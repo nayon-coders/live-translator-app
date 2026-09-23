@@ -1,17 +1,29 @@
-# live_translator
+# Live Translator App
 
-A new Flutter project.
+A powerful and beautiful real-time translation app built with Flutter and GetX.
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- **Real-Time Voice Translation**: Hands-free conversation mode with beautiful, flowing sine wave animations that respond to voice activity.
+- **Conversation Mode (2-way)**: Gorgeous chat-style interface mimicking a real conversation, with split blue and green gradient bubbles.
+- **Text Translation**: A bright, clean, light-mode interface for text-based translations, featuring a clean card-based UI.
+- **Smart Language Picker**: Searchable, highly responsive bottom sheet to quickly pick your source and target languages.
+- **Modern UI/UX**: Uses a glassmorphic aesthetic on the dashboard with deep blurs, animated glowing orbs, and premium custom icons.
 
-A few resources to get you started if this is your first Flutter project:
+## 📸 App Screenshots
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+<div align="center">
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.04.png" width="250" />
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.12.png" width="250" />
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.18.png" width="250" />
+  <br/><br/>
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.24.png" width="250" />
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.29.png" width="250" />
+  <img src="app-screenshorts/Simulator%20Screenshot%20-%20iPhone%2016e%20-%202026-09-23%20at%2013.39.38.png" width="250" />
+</div>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# live-translator-app
+## 🛠 Tech Stack
+
+- **Framework**: Flutter
+- **State Management**: GetX
+- **Architecture**: MVC / Modular

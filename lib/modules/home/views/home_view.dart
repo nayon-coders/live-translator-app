@@ -15,16 +15,18 @@ class HomeView extends GetView<HomeController> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {},
+        leadingWidth: 140,
+
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Image.asset('assets/images/logo.png', width: 100, height: 100),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.history, color: Colors.white),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Stack(
         children: [
@@ -64,7 +66,6 @@ class HomeView extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
-
                   // Language Selection Area
                   Stack(
                     alignment: Alignment.centerRight,
@@ -362,7 +363,8 @@ class AnimatedHomeMic extends StatefulWidget {
   State<AnimatedHomeMic> createState() => _AnimatedHomeMicState();
 }
 
-class _AnimatedHomeMicState extends State<AnimatedHomeMic> with SingleTickerProviderStateMixin {
+class _AnimatedHomeMicState extends State<AnimatedHomeMic>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -393,7 +395,9 @@ class _AnimatedHomeMicState extends State<AnimatedHomeMic> with SingleTickerProv
             color: const Color(0xFF3B82F6).withAlpha(15),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF9333EA).withAlpha((40 + (_controller.value * 30)).toInt()),
+                color: const Color(
+                  0xFF9333EA,
+                ).withAlpha((40 + (_controller.value * 30)).toInt()),
                 blurRadius: 60 + (_controller.value * 20),
                 spreadRadius: 15 + (_controller.value * 10),
               ),
