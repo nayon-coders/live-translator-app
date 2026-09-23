@@ -144,62 +144,8 @@ class HomeView extends GetView<HomeController> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Glowing orb effect
-                          Container(
-                            width: 180,
-                            height: 180,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF3B82F6).withAlpha(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF9333EA).withAlpha(60),
-                                  blurRadius: 60,
-                                  spreadRadius: 15,
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF3B82F6),
-                                      Color(0xFF9333EA),
-                                    ], // Blue to Purple
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFF9333EA,
-                                      ).withAlpha(150),
-                                      blurRadius: 25,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    customBorder: const CircleBorder(),
-                                    onTap: () {
-                                      Get.toNamed('/live-translation');
-                                    },
-                                    child: const Icon(
-                                      Icons.mic,
-                                      color: Colors.white,
-                                      size: 50,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          // Glowing orb effect with wave animation
+                          const AnimatedHomeMic(),
                           const SizedBox(height: 30),
                           const Text(
                             'Tap to Speak',
@@ -403,6 +349,92 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// --- Home Mic Wave Animation ---
+
+class AnimatedHomeMic extends StatefulWidget {
+  const AnimatedHomeMic({super.key});
+
+  @override
+  State<AnimatedHomeMic> createState() => _AnimatedHomeMicState();
+}
+
+class _AnimatedHomeMicState extends State<AnimatedHomeMic> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          width: 180 + (_controller.value * 20),
+          height: 180 + (_controller.value * 20),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF3B82F6).withAlpha(15),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9333EA).withAlpha((40 + (_controller.value * 30)).toInt()),
+                blurRadius: 60 + (_controller.value * 20),
+                spreadRadius: 15 + (_controller.value * 10),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF3B82F6),
+                    Color(0xFF9333EA),
+                  ], // Blue to Purple
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF9333EA).withAlpha(150),
+                    blurRadius: 25,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () {
+                    Get.toNamed('/live-translation');
+                  },
+                  child: const Icon(Icons.mic, color: Colors.white, size: 50),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
