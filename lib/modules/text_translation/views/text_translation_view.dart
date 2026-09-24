@@ -18,7 +18,7 @@ class TextTranslationView extends GetView<TextTranslationController> {
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          'Translation Result',
+          'Text Translation',
           style: TextStyle(
             color: Color(0xFF1E293B),
             fontWeight: FontWeight.w700,
@@ -26,12 +26,6 @@ class TextTranslationView extends GetView<TextTranslationController> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.copy_outlined, color: Color(0xFF3B82F6)),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -44,7 +38,7 @@ class TextTranslationView extends GetView<TextTranslationController> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFBCFE8).withAlpha(100), // Soft pink
+                color: const Color(0xFFFBCFE8).withAlpha(100),
               ),
             ),
           ),
@@ -56,7 +50,7 @@ class TextTranslationView extends GetView<TextTranslationController> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFED7AA).withAlpha(80), // Soft orange
+                color: const Color(0xFFFED7AA).withAlpha(80),
               ),
             ),
           ),
@@ -68,12 +62,11 @@ class TextTranslationView extends GetView<TextTranslationController> {
               height: 250,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFBFDBFE).withAlpha(100), // Soft blue
+                color: const Color(0xFFBFDBFE).withAlpha(100),
               ),
             ),
           ),
           
-          // Blur layer for blobs
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
@@ -90,11 +83,11 @@ class TextTranslationView extends GetView<TextTranslationController> {
                     padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
                     child: Column(
                       children: [
-                        // Source Card (English)
+                        // Source Card
                         _buildSourceCard(),
                         const SizedBox(height: 20),
                         
-                        // Target Card (Hindi)
+                        // Target Card
                         _buildTargetCard(),
                         const SizedBox(height: 30),
                         
@@ -103,13 +96,13 @@ class TextTranslationView extends GetView<TextTranslationController> {
                         const SizedBox(height: 30),
                         
                         // Alternative Translations
-                        _buildAlternativeTranslations(),
+                        // _buildAlternativeTranslations(),
                       ],
                     ),
                   ),
                 ),
                 
-                // Bottom Button
+                // Bottom Button (Translate)
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Container(
@@ -134,17 +127,27 @@ class TextTranslationView extends GetView<TextTranslationController> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(28),
-                        onTap: () => Get.back(),
-                        child: const Center(
-                          child: Text(
-                            'Translate Another',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                        onTap: () {
+                          // Hide keyboard
+                          FocusScope.of(context).unfocus();
+                          controller.translateText();
+                        },
+                        child: Obx(() => Center(
+                          child: controller.isTranslating.value
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Text(
+                                  'Translate Now',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        )),
                       ),
                     ),
                   ),
@@ -172,23 +175,44 @@ class TextTranslationView extends GetView<TextTranslationController> {
             children: [
               const Icon(Icons.g_translate, color: Color(0xFF3B82F6), size: 18),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Detected: English',
-                  style: TextStyle(
+                  controller.sourceLanguage.name,
+                  style: const TextStyle(
                     color: Color(0xFF3B82F6),
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
               ),
-              Icon(Icons.volume_up, color: const Color(0xFF3B82F6).withAlpha(200), size: 20),
+              InkWell(
+                onTap: controller.clearText,
+                child: Icon(Icons.clear, color: const Color(0xFF3B82F6).withAlpha(150), size: 20),
+              ),
+              const SizedBox(width: 16),
+              InkWell(
+                onTap: controller.speakSource,
+                child: Icon(Icons.volume_up, color: const Color(0xFF3B82F6).withAlpha(200), size: 20),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Where is the nearest bus station?',
-            style: TextStyle(
+          TextField(
+            controller: controller.textController,
+            maxLines: null,
+            minLines: 3,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              controller.translateText();
+            },
+            decoration: const InputDecoration(
+              hintText: 'Enter text here...',
+              border: InputBorder.none,
+              hintStyle: TextStyle(
+                color: Colors.black26,
+              ),
+            ),
+            style: const TextStyle(
               color: Color(0xFF1E293B),
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -214,28 +238,33 @@ class TextTranslationView extends GetView<TextTranslationController> {
             children: [
               const Icon(Icons.security, color: Color(0xFF10B981), size: 18),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Hindi',
-                  style: TextStyle(
+                  controller.targetLanguage.name,
+                  style: const TextStyle(
                     color: Color(0xFF10B981),
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
               ),
-              Icon(Icons.volume_up, color: const Color(0xFF10B981).withAlpha(200), size: 20),
+              InkWell(
+                onTap: controller.speakTarget,
+                child: Icon(Icons.volume_up, color: const Color(0xFF10B981).withAlpha(200), size: 20),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'नजदीकी बस स्टेशन कहाँ हैं?',
+          Obx(() => Text(
+            controller.translatedText.value.isEmpty 
+              ? (controller.isTranslating.value ? 'Translating...' : 'Translation will appear here')
+              : controller.translatedText.value,
             style: TextStyle(
-              color: Color(0xFF1E293B),
-              fontSize: 22, // Hindi script often needs to be slightly larger
+              color: controller.translatedText.value.isEmpty ? Colors.black38 : const Color(0xFF1E293B),
+              fontSize: 22,
               fontWeight: FontWeight.w600,
             ),
-          ),
+          )),
         ],
       ),
     );
@@ -245,152 +274,47 @@ class TextTranslationView extends GetView<TextTranslationController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildActionButton(Icons.copy_outlined, 'Copy'),
-        _buildActionButton(Icons.share_outlined, 'Share'),
-        _buildActionButton(Icons.bookmark_border, 'Save'),
-        _buildActionButton(Icons.mic_none, 'Speak'),
+        _buildActionButton(Icons.copy_outlined, 'Copy', onTap: controller.copyToClipboard),
+        _buildActionButton(Icons.share_outlined, 'Share', onTap: () {}),
+        _buildActionButton(Icons.bookmark_border, 'Save', onTap: () {}),
+        _buildActionButton(Icons.mic_none, 'Speak', onTap: controller.speakTarget),
       ],
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF3B82F6).withAlpha(20),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Icon(icon, color: const Color(0xFF3B82F6), size: 22),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF64748B),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAlternativeTranslations() {
-    return Obx(() => Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(5),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+  Widget _buildActionButton(IconData icon, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
-          InkWell(
-            onTap: controller.toggleExpanded,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24), bottom: Radius.circular(24)),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Alternative Translations',
-                      style: TextStyle(
-                        color: Color(0xFF1E293B),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    controller.isExpanded.value ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ],
-              ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF3B82F6).withAlpha(20),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: const Color(0xFF3B82F6), size: 22),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          
-          // Expanded Content
-          if (controller.isExpanded.value)
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-              child: Column(
-                children: [
-                  _buildAltTranslationItem(
-                    number: '1.',
-                    text: 'नजदीकी बस अड्डा कहाँ हैं?',
-                    context: '(More natural)',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildAltTranslationItem(
-                    number: '2.',
-                    text: 'बस स्टेशन कहाँ स्थित हैं?',
-                    context: '(Formal)',
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
-    ));
-  }
-
-  Widget _buildAltTranslationItem({required String number, required String text, required String context}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          number,
-          style: const TextStyle(
-            color: Color(0xFF1E293B),
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                text,
-                style: const TextStyle(
-                  color: Color(0xFF1E293B),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                context,
-                style: const TextStyle(
-                  color: Color(0xFF64748B),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
