@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:country_flags/country_flags.dart';
 import 'dart:math' as math;
 import '../controllers/live_translation_controller.dart';
-import '../../../../models/language_model.dart';
+import '../../../models/language_model.dart';
 
 class LiveTranslationView extends GetView<LiveTranslationController> {
   const LiveTranslationView({super.key});
@@ -45,8 +45,8 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFF0F172A), // Dark Navy
-                    Color(0xFF0B1120), // Darker Navy
+                    Color(0xFF0F172A),
+                    Color(0xFF0B1120),
                   ],
                 ),
               ),
@@ -68,14 +68,28 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
                 const SizedBox(height: 30),
                 
                 // Status Text
-                Obx(() => Text(
-                      controller.isListening.value ? 'Listening...' : 'Tap to restart',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )),
+                Obx(() {
+                  String statusText;
+                  if (controller.isListening.value) {
+                    statusText = 'Listening...';
+                  } else if (controller.isTranslating.value) {
+                    statusText = 'Translating...';
+                  } else if (controller.isSpeaking.value) {
+                    statusText = 'Speaking...';
+                  } else if (controller.translatedText.value.isNotEmpty) {
+                    statusText = 'Tap mic to translate again';
+                  } else {
+                    statusText = 'Tap to start';
+                  }
+                  return Text(
+                    statusText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                }),
                 const SizedBox(height: 8),
                 Text(
                   'Speak now in ${controller.sourceLanguage.name}',
@@ -87,35 +101,40 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
                     
                 const Spacer(flex: 2),
                 
-                // Translation Cards
-                Padding(
+                // Translation Cards - REAL DATA
+                Obx(() => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: [
                       _buildTranslationCard(
                         language: controller.sourceLanguage,
                         title: 'You said (${controller.sourceLanguage.name})',
-                        text: 'How much does this cost?',
+                        text: controller.recognizedText.value.isEmpty 
+                            ? 'Waiting for speech...' 
+                            : controller.recognizedText.value,
                         isSource: true,
+                        onSpeakerTap: controller.speakOriginal,
                       ),
-                      // Slight overlap trick
                       Transform.translate(
                         offset: const Offset(0, -15),
                         child: _buildTranslationCard(
                           language: controller.targetLanguage,
                           title: 'Translation (${controller.targetLanguage.name})',
-                          text: 'इसकी कीमत कितनी है?', // Dummy text matching design
+                          text: controller.translatedText.value.isEmpty
+                              ? (controller.isTranslating.value ? 'Translating...' : 'Translation will appear here')
+                              : controller.translatedText.value,
                           isSource: false,
+                          onSpeakerTap: controller.speakTranslation,
                         ),
                       ),
                     ],
                   ),
-                ),
+                )),
                 
                 const Spacer(),
                 
-                // Stop Button
-                _buildStopButton(),
+                // Stop/Start Button
+                Obx(() => _buildActionButton()),
                 
                 const SizedBox(height: 30),
               ],
@@ -154,13 +173,11 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
     return Row(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(10), // Circular flag look in design
+          borderRadius: BorderRadius.circular(10),
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CountryFlag.fromCountryCode(
-              lang.countryCode,
-            ),
+            child: CountryFlag.fromCountryCode(lang.countryCode),
           ),
         ),
         const SizedBox(width: 8),
@@ -182,16 +199,14 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Sound waves
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SoundWave(isLeft: true),
-              const SizedBox(width: 160), // Space for the mic in middle
+              const SizedBox(width: 160),
               const SoundWave(isLeft: false),
             ],
           ),
-          // Pulsing Mic
           const PulsingMic(),
         ],
       ),
@@ -203,6 +218,7 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
     required String title,
     required String text,
     required bool isSource,
+    VoidCallback? onSpeakerTap,
   }) {
     return Container(
       width: double.infinity,
@@ -210,8 +226,8 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isSource 
-              ? [const Color(0xFF1E3A8A).withAlpha(200), const Color(0xFF1E40AF).withAlpha(150)] // Blueish
-              : [const Color(0xFF0F766E).withAlpha(200), const Color(0xFF0D9488).withAlpha(150)], // Tealish
+              ? [const Color(0xFF1E3A8A).withAlpha(200), const Color(0xFF1E40AF).withAlpha(150)]
+              : [const Color(0xFF0F766E).withAlpha(200), const Color(0xFF0D9488).withAlpha(150)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -248,13 +264,16 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(30),
-                  shape: BoxShape.circle,
+              GestureDetector(
+                onTap: onSpeakerTap,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(30),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.volume_up, color: Colors.white, size: 16),
                 ),
-                child: const Icon(Icons.volume_up, color: Colors.white, size: 16),
               ),
             ],
           ),
@@ -272,7 +291,8 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
     );
   }
 
-  Widget _buildStopButton() {
+  Widget _buildActionButton() {
+    final listening = controller.isListening.value;
     return InkWell(
       onTap: controller.toggleListening,
       borderRadius: BorderRadius.circular(30),
@@ -283,14 +303,18 @@ class LiveTranslationView extends GetView<LiveTranslationController> {
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: Colors.white.withAlpha(30), width: 1),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.stop_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 8),
+            Icon(
+              listening ? Icons.stop_rounded : Icons.mic,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
             Text(
-              'Tap to stop',
-              style: TextStyle(
+              listening ? 'Tap to stop' : 'Tap to speak',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -370,8 +394,8 @@ class _PulsingMicState extends State<PulsingMic> with SingleTickerProviderStateM
                 shape: BoxShape.circle,
                 gradient: const RadialGradient(
                   colors: [
-                    Color(0xFF3B82F6), // Blue center
-                    Color(0xFF6366F1), // Indigo edge
+                    Color(0xFF3B82F6),
+                    Color(0xFF6366F1),
                   ],
                 ),
                 boxShadow: [
@@ -434,7 +458,6 @@ class _SoundWaveState extends State<SoundWave> with SingleTickerProviderStateMix
   }
 
   void _generateNewTargets() {
-    // Generate heights that look like sound waves (taller near center)
     for (int i = 0; i < barCount; i++) {
       double maxH = (i == 3) ? 70.0 : (i == 2 || i == 4) ? 50.0 : 30.0;
       targetHeights[i] = 10.0 + random.nextDouble() * maxH;
@@ -453,7 +476,6 @@ class _SoundWaveState extends State<SoundWave> with SingleTickerProviderStateMix
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: List.generate(barCount, (index) {
-        // Reverse order for left side so it looks symmetrical
         int actualIndex = widget.isLeft ? (barCount - 1 - index) : index;
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -462,7 +484,7 @@ class _SoundWaveState extends State<SoundWave> with SingleTickerProviderStateMix
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(3),
             gradient: const LinearGradient(
-              colors: [Color(0xFF3B82F6), Color(0xFF9333EA)], // Blue to purple
+              colors: [Color(0xFF3B82F6), Color(0xFF9333EA)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
