@@ -2,7 +2,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translator_plus/translator_plus.dart';
 import 'package:get/get.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 /// Centralized service for Speech-to-Text, Translation, and Text-to-Speech.
 /// Both LiveTranslation and Conversation modules reuse this service.
@@ -28,10 +28,39 @@ class TranslationService extends GetxService {
     await _tts.setVolume(1.0);
     await _tts.setSpeechRate(0.45); // Slightly slower = more natural
     await _tts.setPitch(1.0);
+    
     if (languageCode != null) {
-      // Map our app language codes to TTS locale codes
-      final ttsLang = _mapToTtsLocale(languageCode);
-      await _tts.setLanguage(ttsLang);
+      try {
+        final List<dynamic>? availableLanguages = await _tts.getLanguages;
+        String bestTtsMatch = _mapToTtsLocale(languageCode); // Fallback
+
+        if (availableLanguages != null) {
+          final prefix = languageCode.split('-').first.split('_').first.toLowerCase();
+          
+          // 1. Try exact map match
+          for (var lang in availableLanguages) {
+            if (lang.toString().toLowerCase().replaceAll('_', '-') == bestTtsMatch.toLowerCase()) {
+              bestTtsMatch = lang.toString();
+              break;
+            }
+          }
+          
+          // 2. If exact map match not found, try finding ANY language starting with the prefix (e.g., 'bn' -> 'bn-IN' or 'bn-BD')
+          if (!availableLanguages.contains(bestTtsMatch)) {
+            for (var lang in availableLanguages) {
+              if (lang.toString().toLowerCase().startsWith(prefix)) {
+                bestTtsMatch = lang.toString();
+                break;
+              }
+            }
+          }
+        }
+        
+        debugPrint('TTS using language: $bestTtsMatch');
+        await _tts.setLanguage(bestTtsMatch);
+      } catch (e) {
+        debugPrint('TTS Language Setup Error: $e');
+      }
     }
   }
 
@@ -86,7 +115,14 @@ class TranslationService extends GetxService {
       );
     } catch (e) {
       debugPrint("Speech listen error: $e");
-      Get.snackbar('Microphone Error', 'Could not start listening for this language. It might not be supported on this device.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Language Not Installed', 
+        'This language is not installed on your phone. Please download it from your device Settings (Speech Recognition / Voice Settings) and try again.', 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Color(0xCCEF4444),
+        colorText: const Color(0xFFFFFFFF),
+        duration: const Duration(seconds: 4),
+      );
       // Reset state if possible
       final convController = Get.isRegistered<dynamic>(tag: 'ConversationController') ? Get.find<dynamic>(tag: 'ConversationController') : null;
       if (convController != null) {

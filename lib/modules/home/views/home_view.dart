@@ -197,7 +197,9 @@ class HomeView extends GetView<HomeController> {
                               Icons.camera_alt,
                               'Camera',
                               '(Scan Text)',
-                              () {},
+                              () {
+                                Get.toNamed('/camera-translation');
+                              },
                             ),
                             _buildBottomAction(
                               Icons.chat_bubble_outline,

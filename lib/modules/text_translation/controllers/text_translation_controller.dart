@@ -65,6 +65,11 @@ class TextTranslationController extends GetxController {
 
   void speakSource() {
     if (textController.text.isNotEmpty) {
+      if (isSpeaking.value) {
+        _translationService.stopSpeaking();
+        isSpeaking.value = false;
+        return;
+      }
       isSpeaking.value = true;
       _translationService.speak(textController.text, languageCode: sourceLanguage.code);
     }
@@ -72,6 +77,11 @@ class TextTranslationController extends GetxController {
 
   void speakTarget() {
     if (translatedText.value.isNotEmpty) {
+      if (isSpeaking.value) {
+        _translationService.stopSpeaking();
+        isSpeaking.value = false;
+        return;
+      }
       isSpeaking.value = true;
       _translationService.speak(translatedText.value, languageCode: targetLanguage.code);
     }
@@ -87,5 +97,27 @@ class TextTranslationController extends GetxController {
   void clearText() {
     textController.clear();
     translatedText.value = '';
+  }
+
+  final isListening = false.obs;
+
+  void toggleVoiceInput() {
+    if (isListening.value) {
+      _translationService.stopListening();
+      isListening.value = false;
+    } else {
+      clearText();
+      isListening.value = true;
+      _translationService.startListening(
+        localeId: sourceLanguage.code,
+        onResult: (text, isFinal) {
+          textController.text = text;
+          if (isFinal) {
+            isListening.value = false;
+            translateText();
+          }
+        },
+      );
+    }
   }
 }

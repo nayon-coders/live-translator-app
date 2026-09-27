@@ -10,6 +10,8 @@ import '../modules/conversation/views/conversation_view.dart';
 import '../modules/conversation/bindings/conversation_binding.dart';
 import '../modules/text_translation/views/text_translation_view.dart';
 import '../modules/text_translation/bindings/text_translation_binding.dart';
+import '../modules/camera_translation/views/camera_translation_view.dart';
+import '../modules/camera_translation/bindings/camera_translation_binding.dart';
 
 class AppPages {
   static final pages = [
@@ -37,6 +39,11 @@ class AppPages {
       name: AppRoutes.textTranslation,
       page: () => const TextTranslationView(),
       binding: TextTranslationBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.cameraTranslation,
+      page: () => const CameraTranslationView(),
+      binding: CameraTranslationBinding(),
     ),
   ];
 }

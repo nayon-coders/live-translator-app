@@ -192,7 +192,11 @@ class TextTranslationView extends GetView<TextTranslationController> {
               const SizedBox(width: 16),
               InkWell(
                 onTap: controller.speakSource,
-                child: Icon(Icons.volume_up, color: const Color(0xFF3B82F6).withAlpha(200), size: 20),
+                child: Obx(() => Icon(
+                  controller.isSpeaking.value ? Icons.stop_circle : Icons.volume_up, 
+                  color: const Color(0xFF3B82F6).withAlpha(200), 
+                  size: 20
+                )),
               ),
             ],
           ),
@@ -250,7 +254,11 @@ class TextTranslationView extends GetView<TextTranslationController> {
               ),
               InkWell(
                 onTap: controller.speakTarget,
-                child: Icon(Icons.volume_up, color: const Color(0xFF10B981).withAlpha(200), size: 20),
+                child: Obx(() => Icon(
+                  controller.isSpeaking.value ? Icons.stop_circle : Icons.volume_up, 
+                  color: const Color(0xFF10B981).withAlpha(200), 
+                  size: 20
+                )),
               ),
             ],
           ),
@@ -272,45 +280,52 @@ class TextTranslationView extends GetView<TextTranslationController> {
 
   Widget _buildActionRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildActionButton(Icons.copy_outlined, 'Copy', onTap: controller.copyToClipboard),
-        _buildActionButton(Icons.share_outlined, 'Share', onTap: () {}),
-        _buildActionButton(Icons.bookmark_border, 'Save', onTap: () {}),
-        _buildActionButton(Icons.mic_none, 'Speak', onTap: controller.speakTarget),
+        const SizedBox(width: 40),
+        Obx(() {
+          final isListening = controller.isListening.value;
+          return _buildActionButton(
+            isListening ? Icons.mic : Icons.mic_none, 
+            isListening ? 'Listening...' : 'Speak', 
+            onTap: controller.toggleVoiceInput,
+            isActive: isListening,
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, {VoidCallback? onTap}) {
+  Widget _buildActionButton(IconData icon, String label, {VoidCallback? onTap, bool isActive = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isActive ? const Color(0xFF3B82F6) : Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF3B82F6).withAlpha(20),
+                  color: const Color(0xFF3B82F6).withAlpha(isActive ? 60 : 20),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
               ],
             ),
-            child: Icon(icon, color: const Color(0xFF3B82F6), size: 22),
+            child: Icon(icon, color: isActive ? Colors.white : const Color(0xFF3B82F6), size: 26),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+            style: TextStyle(
+              color: isActive ? const Color(0xFF3B82F6) : const Color(0xFF64748B),
+              fontSize: 13,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
         ],

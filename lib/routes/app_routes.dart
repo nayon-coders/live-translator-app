@@ -4,4 +4,5 @@ class AppRoutes {
   static const String liveTranslation = '/live-translation';
   static const String conversation = '/conversation';
   static const String textTranslation = '/text-translation';
+  static const String cameraTranslation = '/camera-translation';
 }
