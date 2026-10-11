@@ -1,0 +1,13 @@
+{
+  "name": "translivo-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\"",
+    "install:all": "cd backend && npm install && cd ../admin && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

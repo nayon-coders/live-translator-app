@@ -12,6 +12,8 @@ import '../modules/text_translation/views/text_translation_view.dart';
 import '../modules/text_translation/bindings/text_translation_binding.dart';
 import '../modules/camera_translation/views/camera_translation_view.dart';
 import '../modules/camera_translation/bindings/camera_translation_binding.dart';
+import '../modules/english_teacher/views/english_teacher_view.dart';
+import '../modules/english_teacher/bindings/english_teacher_binding.dart';
 
 class AppPages {
   static final pages = [
@@ -44,6 +46,11 @@ class AppPages {
       name: AppRoutes.cameraTranslation,
       page: () => const CameraTranslationView(),
       binding: CameraTranslationBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.englishTeacher,
+      page: () => const EnglishTeacherView(),
+      binding: EnglishTeacherBinding(),
     ),
   ];
 }

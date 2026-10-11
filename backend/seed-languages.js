@@ -1,0 +1,105 @@
+import { db } from './src/db/index.js';
+
+const appLanguages = [
+  { name: "English", native_name: "English", code: "en", iso3: "eng", flag: "🇺🇸", is_enabled: true },
+  { name: "Spanish", native_name: "Español", code: "es", iso3: "spa", flag: "🇪🇸", is_enabled: true },
+  { name: "Chinese (Simplified)", native_name: "简体中文", code: "zh-CN", iso3: "zho", flag: "🇨🇳", is_enabled: true },
+  { name: "Chinese (Traditional)", native_name: "繁體中文", code: "zh-TW", iso3: "zho", flag: "🇹🇼", is_enabled: true },
+  { name: "Japanese", native_name: "日本語", code: "ja", iso3: "jpn", flag: "🇯🇵", is_enabled: true },
+  { name: "Korean", native_name: "한국어", code: "ko", iso3: "kor", flag: "🇰🇷", is_enabled: true },
+  { name: "French", native_name: "Français", code: "fr", iso3: "fra", flag: "🇫🇷", is_enabled: true },
+  { name: "German", native_name: "Deutsch", code: "de", iso3: "deu", flag: "🇩🇪", is_enabled: true },
+  { name: "Portuguese", native_name: "Português", code: "pt", iso3: "por", flag: "🇵🇹", is_enabled: true },
+  { name: "Russian", native_name: "Русский", code: "ru", iso3: "rus", flag: "🇷🇺", is_enabled: true },
+  { name: "Arabic", native_name: "العربية", code: "ar", iso3: "ara", flag: "🇸🇦", is_enabled: true },
+  { name: "Italian", native_name: "Italiano", code: "it", iso3: "ita", flag: "🇮🇹", is_enabled: true },
+  { name: "Dutch", native_name: "Nederlands", code: "nl", iso3: "nld", flag: "🇳🇱", is_enabled: true },
+  { name: "Turkish", native_name: "Türkçe", code: "tr", iso3: "tur", flag: "🇹🇷", is_enabled: true },
+  { name: "Vietnamese", native_name: "Tiếng Việt", code: "vi", iso3: "vie", flag: "🇻🇳", is_enabled: true },
+  { name: "Thai", native_name: "ไทย", code: "th", iso3: "tha", flag: "🇹🇭", is_enabled: true },
+  { name: "Indonesian", native_name: "Bahasa Indonesia", code: "id", iso3: "ind", flag: "🇮🇩", is_enabled: true },
+  { name: "Malay", native_name: "Bahasa Melayu", code: "ms", iso3: "msa", flag: "🇲🇾", is_enabled: true },
+  { name: "Filipino", native_name: "Filipino", code: "fil", iso3: "fil", flag: "🇵🇭", is_enabled: true },
+  { name: "Persian", native_name: "فارسی", code: "fa", iso3: "fas", flag: "🇮🇷", is_enabled: true },
+  { name: "Hebrew", native_name: "עברית", code: "he", iso3: "heb", flag: "🇮🇱", is_enabled: true },
+  { name: "Ukrainian", native_name: "Українська", code: "uk", iso3: "ukr", flag: "🇺🇦", is_enabled: true },
+  { name: "Polish", native_name: "Polski", code: "pl", iso3: "pol", flag: "🇵🇱", is_enabled: true },
+  { name: "Romanian", native_name: "Română", code: "ro", iso3: "ron", flag: "🇷🇴", is_enabled: true },
+  { name: "Greek", native_name: "Ελληνικά", code: "el", iso3: "ell", flag: "🇬🇷", is_enabled: true },
+  { name: "Czech", native_name: "Čeština", code: "cs", iso3: "ces", flag: "🇨🇿", is_enabled: true },
+  { name: "Hungarian", native_name: "Magyar", code: "hu", iso3: "hun", flag: "🇭🇺", is_enabled: true },
+  { name: "Swedish", native_name: "Svenska", code: "sv", iso3: "swe", flag: "🇸🇪", is_enabled: true },
+  { name: "Norwegian", native_name: "Norsk", code: "no", iso3: "nor", flag: "🇳🇴", is_enabled: true },
+  { name: "Danish", native_name: "Dansk", code: "da", iso3: "dan", flag: "🇩🇰", is_enabled: true },
+  { name: "Finnish", native_name: "Suomi", code: "fi", iso3: "fin", flag: "🇫🇮", is_enabled: true },
+  { name: "Icelandic", native_name: "Íslenska", code: "is", iso3: "isl", flag: "🇮🇸", is_enabled: true },
+  { name: "Slovak", native_name: "Slovenčina", code: "sk", iso3: "slk", flag: "🇸🇰", is_enabled: true },
+  { name: "Bulgarian", native_name: "Български", code: "bg", iso3: "bul", flag: "🇧🇬", is_enabled: true },
+  { name: "Serbian", native_name: "Српски", code: "sr", iso3: "srp", flag: "🇷🇸", is_enabled: true },
+  { name: "Croatian", native_name: "Hrvatski", code: "hr", iso3: "hrv", flag: "🇭🇷", is_enabled: true },
+  { name: "Slovenian", native_name: "Slovenščina", code: "sl", iso3: "slv", flag: "🇸🇮", is_enabled: true },
+  { name: "Bosnian", native_name: "Bosanski", code: "bs", iso3: "bos", flag: "🇧🇦", is_enabled: true },
+  { name: "Albanian", native_name: "Shqip", code: "sq", iso3: "sqi", flag: "🇦🇱", is_enabled: true },
+  { name: "Macedonian", native_name: "Македонски", code: "mk", iso3: "mkd", flag: "🇲🇰", is_enabled: true },
+  { name: "Bengali", native_name: "বাংলা", code: "bn", iso3: "ben", flag: "🇧🇩", is_enabled: true },
+  { name: "Hindi", native_name: "हिन्दी", code: "hi", iso3: "hin", flag: "🇮🇳", is_enabled: true },
+  { name: "Urdu", native_name: "اردو", code: "ur", iso3: "urd", flag: "🇵🇰", is_enabled: true },
+  { name: "Punjabi", native_name: "ਪੰਜਾਬੀ", code: "pa", iso3: "pan", flag: "🇮🇳", is_enabled: true },
+  { name: "Gujarati", native_name: "ગુજરાતી", code: "gu", iso3: "guj", flag: "🇮🇳", is_enabled: true },
+  { name: "Marathi", native_name: "मराठी", code: "mr", iso3: "mar", flag: "🇮🇳", is_enabled: true },
+  { name: "Tamil", native_name: "தமிழ்", code: "ta", iso3: "tam", flag: "🇮🇳", is_enabled: true },
+  { name: "Telugu", native_name: "తెలుగు", code: "te", iso3: "tel", flag: "🇮🇳", is_enabled: true },
+  { name: "Kannada", native_name: "ಕನ್ನಡ", code: "kn", iso3: "kan", flag: "🇮🇳", is_enabled: true },
+  { name: "Malayalam", native_name: "മലയാളം", code: "ml", iso3: "mal", flag: "🇮🇳", is_enabled: true },
+  { name: "Odia", native_name: "ଓଡ଼ିଆ", code: "or", iso3: "ori", flag: "🇮🇳", is_enabled: true },
+  { name: "Assamese", native_name: "অসমীয়া", code: "as", iso3: "asm", flag: "🇮🇳", is_enabled: true },
+  { name: "Nepali", native_name: "नेपाली", code: "ne", iso3: "nep", flag: "🇳🇵", is_enabled: true },
+  { name: "Sinhala", native_name: "සිංහල", code: "si", iso3: "sin", flag: "🇱🇰", is_enabled: true },
+  { name: "Amharic", native_name: "አማርኛ", code: "am", iso3: "amh", flag: "🇪🇹", is_enabled: true },
+  { name: "Somali", native_name: "Soomaali", code: "so", iso3: "som", flag: "🇸🇴", is_enabled: true },
+  { name: "Pashto", native_name: "پښتو", code: "ps", iso3: "pus", flag: "🇦🇫", is_enabled: true },
+  { name: "Kurdish", native_name: "Kurdî", code: "ku", iso3: "kur", flag: "🇮🇶", is_enabled: true },
+  { name: "Armenian", native_name: "Հայերեն", code: "hy", iso3: "hye", flag: "🇦🇲", is_enabled: true },
+  { name: "Georgian", native_name: "ქართული", code: "ka", iso3: "kat", flag: "🇬🇪", is_enabled: true },
+  { name: "Azerbaijani", native_name: "Azərbaycan dili", code: "az", iso3: "aze", flag: "🇦🇿", is_enabled: true },
+  { name: "Kazakh", native_name: "Қазақша", code: "kk", iso3: "kaz", flag: "🇰🇿", is_enabled: true },
+  { name: "Uzbek", native_name: "Oʻzbekcha", code: "uz", iso3: "uzb", flag: "🇺🇿", is_enabled: true },
+  { name: "Burmese", native_name: "မြန်မာ", code: "my", iso3: "mya", flag: "🇲🇲", is_enabled: true },
+  { name: "Khmer", native_name: "ខ្មែរ", code: "km", iso3: "khm", flag: "🇰🇭", is_enabled: true },
+  { name: "Lao", native_name: "ລາວ", code: "lo", iso3: "lao", flag: "🇱🇦", is_enabled: true },
+  { name: "Mongolian", native_name: "Монгол", code: "mn", iso3: "mon", flag: "🇲🇳", is_enabled: true },
+  { name: "Swahili", native_name: "Kiswahili", code: "sw", iso3: "swa", flag: "🇰🇪", is_enabled: true },
+  { name: "Zulu", native_name: "isiZulu", code: "zu", iso3: "zul", flag: "🇿🇦", is_enabled: true },
+  { name: "Xhosa", native_name: "isiXhosa", code: "xh", iso3: "xho", flag: "🇿🇦", is_enabled: true },
+  { name: "Afrikaans", native_name: "Afrikaans", code: "af", iso3: "afr", flag: "🇿🇦", is_enabled: true },
+  { name: "Yoruba", native_name: "Yorùbá", code: "yo", iso3: "yor", flag: "🇳🇬", is_enabled: true },
+  { name: "Igbo", native_name: "Igbo", code: "ig", iso3: "ibo", flag: "🇳🇬", is_enabled: true },
+  { name: "Hausa", native_name: "Hausa", code: "ha", iso3: "hau", flag: "🇳🇬", is_enabled: true },
+  { name: "Estonian", native_name: "Eesti", code: "et", iso3: "est", flag: "🇪🇪", is_enabled: true },
+  { name: "Latvian", native_name: "Latviešu", code: "lv", iso3: "lav", flag: "🇱🇻", is_enabled: true },
+  { name: "Lithuanian", native_name: "Lietuvių", code: "lt", iso3: "lit", flag: "🇱🇹", is_enabled: true },
+  { name: "Catalan", native_name: "Català", code: "ca", iso3: "cat", flag: "🇪🇸", is_enabled: true },
+  { name: "Galician", native_name: "Galego", code: "gl", iso3: "glg", flag: "🇪🇸", is_enabled: true },
+  { name: "Basque", native_name: "Euskara", code: "eu", iso3: "eus", flag: "🇪🇸", is_enabled: true },
+  { name: "Welsh", native_name: "Cymraeg", code: "cy", iso3: "cym", flag: "🏴", is_enabled: true },
+  { name: "Irish", native_name: "Gaeilge", code: "ga", iso3: "gle", flag: "🇮🇪", is_enabled: true },
+  { name: "Maltese", native_name: "Malti", code: "mt", iso3: "mlt", flag: "🇲🇹", is_enabled: true },
+  { name: "Haitian Creole", native_name: "Kreyòl Ayisyen", code: "ht", iso3: "hat", flag: "🇭🇹", is_enabled: true },
+  { name: "Quechua", native_name: "Runa Simi", code: "qu", iso3: "que", flag: "🇵🇪", is_enabled: true },
+  { name: "Guarani", native_name: "Avañe'ẽ", code: "gn", iso3: "grn", flag: "🇵🇾", is_enabled: true }
+];
+
+async function seed() {
+  try {
+    for (const lang of appLanguages) {
+      await db('languages').insert(lang).onConflict('code').merge();
+    }
+    console.log(`Inserted ${appLanguages.length} languages!`);
+  } catch (error) {
+    console.error('Error seeding:', error);
+  } finally {
+    await db.destroy();
+  }
+}
+
+seed();

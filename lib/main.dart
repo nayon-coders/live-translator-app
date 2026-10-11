@@ -4,9 +4,17 @@ import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 import 'services/translation_service.dart';
 
-void main() {
+import 'services/api_client.dart';
+import 'services/remote_config_service.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Initialize API Client
+  await Get.putAsync(() => ApiClient().init());
+  // Initialize and register remote config service
+  await Get.putAsync(() => RemoteConfigService().init());
+
   // Register the TranslationService globally so all modules can use it
   Get.put(TranslationService());
   runApp(const LiveTranslatorApp());

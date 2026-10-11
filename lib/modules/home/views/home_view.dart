@@ -4,6 +4,7 @@ import 'package:country_flags/country_flags.dart';
 import 'dart:ui';
 import '../controllers/home_controller.dart';
 import 'language_picker_sheet.dart';
+import '../../../services/remote_config_service.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -190,43 +191,79 @@ class HomeView extends GetView<HomeController> {
                       borderRadius: BorderRadius.circular(24),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildBottomAction(
-                              Icons.camera_alt,
-                              'Camera',
-                              '(Scan Text)',
-                              () {
-                                Get.toNamed('/camera-translation');
-                              },
+                        child: Obx(() {
+                          final config = Get.find<RemoteConfigService>();
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              children: [
+                                if (config.isFeatureEnabled(
+                                  'camera_translation',
+                                ))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.camera_alt,
+                                      'Camera',
+                                      '(Scan Text)',
+                                      () => Get.toNamed('/camera-translation'),
+                                    ),
+                                  ),
+                                if (config.isFeatureEnabled('conversation'))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.chat_bubble_outline,
+                                      'Conversation',
+                                      '(2-way)',
+                                      () => Get.toNamed('/conversation'),
+                                    ),
+                                  ),
+                                if (config.isFeatureEnabled('live_translation'))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.mic_none,
+                                      'Voice',
+                                      '(Hands-free)',
+                                      () => Get.toNamed('/live-translation'),
+                                    ),
+                                  ),
+                                if (config.isFeatureEnabled('text_translation'))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.text_snippet_outlined,
+                                      'Text',
+                                      '(Keyboard)',
+                                      () => Get.toNamed('/text-translation'),
+                                    ),
+                                  ),
+                                if (config.isFeatureEnabled('english_teacher'))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.school_outlined,
+                                      'Teacher',
+                                      '(AI Tutor)',
+                                      () => Get.toNamed('/english-teacher'),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            _buildBottomAction(
-                              Icons.chat_bubble_outline,
-                              'Conversation',
-                              '(2-way)',
-                              () {
-                                Get.toNamed('/conversation');
-                              },
-                            ),
-                            _buildBottomAction(
-                              Icons.mic_none,
-                              'Voice',
-                              '(Hands-free)',
-                              () {
-                                Get.toNamed('/live-translation');
-                              },
-                            ),
-                            _buildBottomAction(
-                              Icons.text_snippet_outlined,
-                              'Text',
-                              '(Keyboard)',
-                              () {
-                                Get.toNamed('/text-translation');
-                              },
-                            ),
-                          ],
-                        ),
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -328,14 +365,14 @@ class HomeView extends GetView<HomeController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               color: Colors.white.withAlpha(25),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white.withAlpha(40), width: 1),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Colors.white, size: 18),
           ),
           const SizedBox(height: 8),
           Text(
@@ -343,7 +380,7 @@ class HomeView extends GetView<HomeController> {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
-              fontSize: 11,
+              fontSize: 10,
             ),
           ),
           Text(

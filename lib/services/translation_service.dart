@@ -12,13 +12,21 @@ class TranslationService extends GetxService {
   final GoogleTranslator _translator = GoogleTranslator();
 
   bool _isInitialized = false;
+  Function(String status)? onSpeechStatus;
+  Function(dynamic error)? onSpeechError;
 
   /// Initialize the speech recognition engine.
   Future<bool> initSpeech() async {
     if (_isInitialized) return true;
     _isInitialized = await _speech.initialize(
-      onError: (error) => debugPrint('Speech error: $error'),
-      onStatus: (status) => debugPrint('Speech status: $status'),
+      onError: (error) {
+        debugPrint('Speech error: $error');
+        onSpeechError?.call(error);
+      },
+      onStatus: (status) {
+        debugPrint('Speech status: $status');
+        onSpeechStatus?.call(status);
+      },
     );
     return _isInitialized;
   }
@@ -28,6 +36,20 @@ class TranslationService extends GetxService {
     await _tts.setVolume(1.0);
     await _tts.setSpeechRate(0.45); // Slightly slower = more natural
     await _tts.setPitch(1.0);
+
+    try {
+      await _tts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playAndRecord,
+        [
+          IosTextToSpeechAudioCategoryOptions.defaultToSpeaker,
+          IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        ],
+        IosTextToSpeechAudioMode.defaultMode,
+      );
+    } catch (e) {
+      debugPrint('Set iOS audio category error: $e');
+    }
     
     if (languageCode != null) {
       try {
@@ -107,10 +129,12 @@ class TranslationService extends GetxService {
           onResult(result.recognizedWords, result.finalResult);
         },
         listenOptions: stt.SpeechListenOptions(
-          listenMode: stt.ListenMode.dictation,
+          listenMode: stt.ListenMode.confirmation,
           cancelOnError: false,
           partialResults: true,
           localeId: bestLocaleId,
+          pauseFor: const Duration(seconds: 3),
+          listenFor: const Duration(seconds: 45),
         ),
       );
     } catch (e) {

@@ -1,0 +1,38 @@
+{
+  "name": "translivo-backend",
+  "version": "0.1.0",
+  "description": "Translivo API + Admin Dashboard",
+  "scripts": {
+    "test": "NODE_ENV=test node --test \"tests/**/*.test.js\"",
+    "dev": "node --watch src/server.js",
+    "start": "NODE_ENV=production node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "knex": "^3.3.0",
+    "mysql2": "^3.24.5",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "knex-cli": "^1.0.1",
+    "pino-pretty": "^13.2.0",
+    "supertest": "^7.3.1"
+  }
+}
