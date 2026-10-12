@@ -66,3 +66,9 @@ Newest entry at the bottom. Each entry = one plan step from [MASTER_PLAN.md](./M
 - Added interactive real-time conversation cards, mic toggle, live speech preview, audio replay ("Listen again"), and text messaging input.
 - Verification: Tested Gemini REST backend generating responses in <1s, tested Flutter analyze with zero issues, verified backend server listening on LAN.
 
+## ✅ C2 — Live Server Deployment & App Configuration — 2026-10-12
+- Configured production backend and React admin dashboard on VPS (`translivo.d2home.com.au`).
+- Updated Flutter `ApiClient.baseUrl` to production HTTPS endpoint (`https://translivo.d2home.com.au/api/v1`).
+- Added `seed-practice-modes.js` and `backend/seeds/03_practice_modes.js` for initial conversation scenarios.
+- Updated `PracticeModes.jsx` in React admin panel with friendly empty state handling.
+

@@ -7,16 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 
 class ApiClient extends GetxService {
-  static const String baseUrl = 'http://192.168.0.214:4000/api/v1';
-  
+  static const String baseUrl = 'https://translivo.d2home.com.au/api/v1';
+
   late SharedPreferences _prefs;
   String? _deviceToken;
   String? _deviceId;
-  
+
   Future<ApiClient> init() async {
     _prefs = await SharedPreferences.getInstance();
     _deviceToken = _prefs.getString('device_token');
-    
+
     if (_deviceToken == null) {
       await _registerDevice();
     }
@@ -26,7 +26,7 @@ class ApiClient extends GetxService {
   Future<void> _registerDevice() async {
     String installId = _prefs.getString('install_id') ?? _generateInstallId();
     await _prefs.setString('install_id', installId);
-    
+
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/devices/register'),
@@ -36,7 +36,7 @@ class ApiClient extends GetxService {
           'platform': defaultTargetPlatform.name,
         }),
       );
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _deviceToken = data['token'];
@@ -49,7 +49,7 @@ class ApiClient extends GetxService {
       debugPrint('Device register error: $e');
     }
   }
-  
+
   String _generateInstallId() {
     final random = Random.secure();
     final values = List<int>.generate(16, (i) => random.nextInt(256));
@@ -58,7 +58,7 @@ class ApiClient extends GetxService {
 
   Future<Map<String, dynamic>?> getConfig() async {
     final etag = _prefs.getString('config_etag');
-    
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/config'),
@@ -67,7 +67,7 @@ class ApiClient extends GetxService {
           if (etag != null) 'If-None-Match': etag,
         },
       );
-      
+
       if (response.statusCode == 304) {
         // Not modified, use cached
         final cached = _prefs.getString('config_data');
@@ -75,7 +75,7 @@ class ApiClient extends GetxService {
           return jsonDecode(cached);
         }
       }
-      
+
       if (response.statusCode == 200) {
         final newEtag = response.headers['etag'];
         if (newEtag != null) {
@@ -84,7 +84,6 @@ class ApiClient extends GetxService {
         await _prefs.setString('config_data', response.body);
         return jsonDecode(response.body);
       }
-      
     } catch (e) {
       debugPrint('Fetch config error: $e');
       final cached = _prefs.getString('config_data');
@@ -95,7 +94,10 @@ class ApiClient extends GetxService {
     return null;
   }
 
-  Future<Map<String, dynamic>?> startLiveSession({String? modeKey, String? levelCode}) async {
+  Future<Map<String, dynamic>?> startLiveSession({
+    String? modeKey,
+    String? levelCode,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/live/sessions'),
@@ -120,7 +122,11 @@ class ApiClient extends GetxService {
     return null;
   }
 
-  Future<void> endLiveSession(String sessionId, int durationSec, String endReason) async {
+  Future<void> endLiveSession(
+    String sessionId,
+    int durationSec,
+    String endReason,
+  ) async {
     try {
       await http.post(
         Uri.parse('$baseUrl/live/sessions/$sessionId/end'),
@@ -175,4 +181,3 @@ class ApiClient extends GetxService {
     return null;
   }
 }
-
