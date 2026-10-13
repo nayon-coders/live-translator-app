@@ -18,5 +18,6 @@ export async function seed(knex) {
     { key: 'text_translation', name: 'Text Translation', is_enabled: true, sort_order: 3 },
     { key: 'camera_translation', name: 'Camera Translation', is_enabled: true, sort_order: 4 },
     { key: 'english_teacher', name: 'AI English Teacher', is_enabled: true, sort_order: 5 },
+    { key: 'ai_friend', name: 'AI Friend', is_enabled: true, sort_order: 6 },
   ]);
 }

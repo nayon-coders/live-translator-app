@@ -129,12 +129,12 @@ class TranslationService extends GetxService {
           onResult(result.recognizedWords, result.finalResult);
         },
         listenOptions: stt.SpeechListenOptions(
-          listenMode: stt.ListenMode.confirmation,
+          listenMode: stt.ListenMode.dictation,
           cancelOnError: false,
           partialResults: true,
           localeId: bestLocaleId,
-          pauseFor: const Duration(seconds: 3),
-          listenFor: const Duration(seconds: 45),
+          pauseFor: const Duration(seconds: 4),
+          listenFor: const Duration(seconds: 60),
         ),
       );
     } catch (e) {

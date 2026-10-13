@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_flags/country_flags.dart';
 import '../controllers/home_controller.dart';
+import '../../../models/language_model.dart';
 
 class LanguagePickerSheet extends GetView<HomeController> {
   final bool isSource;
+  final void Function(LanguageModel)? onLanguageSelected;
   
-  const LanguagePickerSheet({super.key, required this.isSource});
+  const LanguagePickerSheet({
+    super.key,
+    required this.isSource,
+    this.onLanguageSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +137,7 @@ class LanguagePickerSheet extends GetView<HomeController> {
                         : null,
                     onTap: () {
                       controller.selectLanguage(lang, isSource);
+                      onLanguageSelected?.call(lang);
                       Get.back(); // Close bottom sheet
                     },
                   );

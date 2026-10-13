@@ -31,6 +31,8 @@ class EnglishTeacherController extends GetxController {
   final RxString currentRecognizedText = ''.obs;
   final RxList<TeacherChatMessage> messages = <TeacherChatMessage>[].obs;
 
+  final ScrollController scrollController = ScrollController();
+
   String? _currentSessionId;
   DateTime? _sessionStartTime;
   
@@ -81,6 +83,15 @@ class EnglishTeacherController extends GetxController {
       isSpeaking.value = false;
     });
 
+    // Auto-scroll when messages, thinking state, or live speech updates
+    ever(messages, (_) => scrollToBottom());
+    ever(isThinking, (val) {
+      if (val == true) scrollToBottom();
+    });
+    ever(currentRecognizedText, (val) {
+      if (val.toString().isNotEmpty) scrollToBottom();
+    });
+
     _translationService.onSpeechStatus = (status) {
       debugPrint('EnglishTeacher speech status: $status');
       if (status == 'done' || status == 'notListening') {
@@ -97,8 +108,15 @@ class EnglishTeacherController extends GetxController {
 
     _translationService.onSpeechError = (error) {
       debugPrint('EnglishTeacher speech error: $error');
-      // error_no_match is a normal silence timeout; reset listening state cleanly
       isListening.value = false;
+
+      if (currentRecognizedText.value.trim().isNotEmpty) {
+        final text = currentRecognizedText.value.trim();
+        currentRecognizedText.value = '';
+        sendMessage(text);
+        return;
+      }
+      currentRecognizedText.value = '';
     };
   }
 
@@ -139,7 +157,7 @@ class EnglishTeacherController extends GetxController {
 
     // Speak greeting aloud
     isSpeaking.value = true;
-    await _translationService.speak(greeting, languageCode: 'en-US');
+    await _translationService.speak(cleanForTTS(greeting), languageCode: 'en-US');
   }
 
   Future<void> toggleListening() async {
@@ -192,9 +210,29 @@ class EnglishTeacherController extends GetxController {
     }
   }
 
+  bool _isAdultContent(String text) {
+    final regex = RegExp(
+      r'\b(porn|porno|pornography|sex|sexy|sexual|erotic|nude|naked|nudity|nsfw|boobs|penis|vagina|blowjob|masturbat\w*|horny|orgasm|intercourse|fetish|xxx|choda|chuda|magi|bessha|randi|chudi|chudai)\b',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(text);
+  }
+
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || isThinking.value) return;
+
+    if (_isAdultContent(trimmed)) {
+      textInputController.clear();
+      Get.snackbar(
+        'Content Warning',
+        'Adult, sexual, or inappropriate content is strictly prohibited.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xCCEF4444),
+        colorText: Colors.white,
+      );
+      return;
+    }
 
     textInputController.clear();
     messages.add(TeacherChatMessage(text: trimmed, isUser: true));
@@ -222,7 +260,7 @@ class EnglishTeacherController extends GetxController {
       if (reply != null && reply.trim().isNotEmpty) {
         messages.add(TeacherChatMessage(text: reply, isUser: false));
         isSpeaking.value = true;
-        await _translationService.speak(reply, languageCode: 'en-US');
+        await _translationService.speak(cleanForTTS(reply), languageCode: 'en-US');
       } else {
         Get.snackbar('Notice', 'Teacher could not respond. Please try again.',
             snackPosition: SnackPosition.BOTTOM);
@@ -235,10 +273,37 @@ class EnglishTeacherController extends GetxController {
     }
   }
 
+  /// Remove markdown symbols so TTS reads clean, natural English
+  String cleanForTTS(String text) {
+    return text.replaceAll('**', '').replaceAll('*', '').replaceAll('#', '').trim();
+  }
+
+  /// Automatically scroll to the latest message
+  void scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutQuad,
+        );
+      }
+    });
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutQuad,
+        );
+      }
+    });
+  }
+
   Future<void> replayMessage(String text) async {
     isSpeaking.value = true;
     await _translationService.stopSpeaking();
-    await _translationService.speak(text, languageCode: 'en-US');
+    await _translationService.speak(cleanForTTS(text), languageCode: 'en-US');
   }
 
   void endSession() {
@@ -258,6 +323,7 @@ class EnglishTeacherController extends GetxController {
   @override
   void onClose() {
     endSession();
+    scrollController.dispose();
     textInputController.dispose();
     super.onClose();
   }

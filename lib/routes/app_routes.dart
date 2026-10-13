@@ -6,4 +6,5 @@ class AppRoutes {
   static const String textTranslation = '/text-translation';
   static const String cameraTranslation = '/camera-translation';
   static const String englishTeacher = '/english-teacher';
+  static const String aiFriend = '/ai-friend';
 }

@@ -72,3 +72,59 @@ Newest entry at the bottom. Each entry = one plan step from [MASTER_PLAN.md](./M
 - Added `seed-practice-modes.js` and `backend/seeds/03_practice_modes.js` for initial conversation scenarios.
 - Updated `PracticeModes.jsx` in React admin panel with friendly empty state handling.
 
+## ✅ C3 — Live Translation Visual & 2-Way Language Enhancements — 2026-10-13
+- Upgraded `LiveTranslationView` and `LiveTranslationController` with full 2-way conversation capabilities:
+  - Interactive top pill allowing directly selecting source/target languages and instant swap (`⇄`).
+  - Added visual speaker switcher tabs clearly identifying `You (আমি)` vs `Partner (অন্য পাশ)` with reactive active badges.
+  - Added adaptive visual styling: Blue gradient theme for "You", Emerald gradient theme for "Partner" across animated waves, pulsing mic, status subtitle, and translation cards.
+  - Added dual mic action buttons at the bottom: `[🎙️ You (English)]` and `[🎙️ Partner (Hindi)]` for seamless two-way translation.
+  - Made translation cards speaker-aware with audio replay for both original input and translated output.
+- Files: `lib/modules/live_translation/views/live_translation_view.dart`, `lib/modules/live_translation/controllers/live_translation_controller.dart`, `lib/modules/home/views/language_picker_sheet.dart`.
+- Verification: `flutter analyze` 0 errors.
+
+## ✅ C4 — Conversation Mode Visual & Speaker Identification — 2026-10-13
+- Upgraded `ConversationView` and `ConversationController`:
+  - Clean top language pill with `[Hindi ▾]` and `[English ▾]` and instant swap button (`⇄`) without text overflow.
+  - Dedicated segmented turn switcher tab highlighting active speaker: `[👤 You (Hindi)]` vs `[👥 Partner (English)]`.
+  - Upgraded chat bubble design: avatars display country flag badges, clear header `You (Hindi)` or `Partner (English)`, original speech, translation banner, and text-to-speech speaker button.
+  - Added smooth auto-scrolling to latest conversation messages on each incoming speech/translation.
+  - Added dual bottom mic buttons: `[🎙️ You (Hindi)]` and `[🎙️ Partner (English)]`.
+- Files: `lib/modules/conversation/views/conversation_view.dart`, `lib/modules/conversation/controllers/conversation_controller.dart`.
+- Verification: `flutter analyze` 0 errors.
+
+## ✅ C5 — Device Token 401 Self-Healing & Live Chat Resilience — 2026-10-13
+- Resolved `UNAUTHORIZED: Invalid or expired device token` issue caused by cached local dev tokens being sent to live server.
+- Added automatic 401 interception, cache clearance, re-registration with live backend, and automatic retry in `ApiClient` (`getConfig`, `startLiveSession`, `sendLiveChatMessage`).
+- Files: `lib/services/api_client.dart`.
+- Verification: `flutter analyze` 0 errors.
+
+## ✅ C6 — AI English Teacher Auto-Scroll & Word Highlight Badge — 2026-10-13
+- Upgraded `EnglishTeacherView` and `EnglishTeacherController`:
+  - Connected `ScrollController` to `ListView.builder` with bouncy physics and auto-scrolling on new messages, teacher thinking, voice recognition, and keyboard focus.
+  - Implemented rich keyword parser `_buildMessageText` to detect `**word/phrase**` markdown from teacher responses.
+  - Highlighted taught/corrected words with bold text (`FontWeight.bold`, vibrant golden color `0xFFFDE047`) inside a warm amber pill badge (`0xFFF59E0B` with rounded corners and border) or wrapped text highlight.
+  - Replaced unsupported emoji with crisp vector icon (`Icons.school_rounded`) to fix `[?]` missing glyph boxes.
+  - Cleaned asterisks from TTS audio so pronunciations stay natural.
+- Files: `lib/modules/english_teacher/views/english_teacher_view.dart`, `lib/modules/english_teacher/controllers/english_teacher_controller.dart`.
+- Verification: `flutter analyze lib/modules/english_teacher/` passed with 0 issues.
+
+## ✅ C7 — AI Friend Live Voice & Text Companion — 2026-10-13
+- Implemented **AI Friend** live chat companion feature:
+  - Multi-lingual companion mode allowing user to switch to any supported language (English, Bengali, Hindi, Spanish, French, Arabic, German, Japanese, etc.).
+  - Both **Voice** (STT via microphone) and **Text** (keyboard input) conversation modes.
+  - Voice response via device TTS (`TranslationService.speak`) in the selected language with "Listen again" audio replay.
+  - Interactive top bar language picker (`LanguagePickerSheet`) with instant language switching and localized greetings.
+  - Rich conversation starters carousel, glowing voice wave mic button, glassmorphism chat bubbles, and auto-scrolling.
+  - Integrated with Admin Panel: backend migration (`20261013150000_add_ai_friend_feature.js`) added `ai_friend` feature into database, controllable via Admin Panel Features toggle.
+  - Server-side Gemini `/api/v1/live/chat` persona prompt tuned for warm, concise (1-3 sentences) friend companion responses in selected language.
+- Files: `lib/modules/ai_friend/{bindings,controllers,views}/`, `lib/routes/app_pages.dart`, `lib/routes/app_routes.dart`, `lib/modules/home/views/home_view.dart`, `lib/services/api_client.dart`, `backend/migrations/20261013150000_add_ai_friend_feature.js`, `backend/seeds/02_settings.js`, `backend/src/modules/live/live.routes.js`.
+## ✅ C8 — Short Text Length Enforcement & Strict Adult Content Filter — 2026-10-13
+- Enforced strict brevity and family-friendly safety guardrails across AI chat endpoints (AI Friend & English Teacher):
+  - **Always Short Text**: Set Gemini API `generationConfig.maxOutputTokens: 85` and explicit system prompt rules enforcing strictly 1 to 2 short sentences (max 15-25 words) for fast, natural conversation and audio playback.
+  - **Strictly No Adult Content**: Added multi-layer protection:
+    1. Gemini safety settings `BLOCK_LOW_AND_ABOVE` across sexually explicit, harassment, hate speech, and dangerous categories.
+    2. Server-side keyword and intent regex filter (`containsAdultContent`) intercepting inappropriate input with polite, localized refusal messages without consuming tokens.
+    3. Client-side validation in `AiFriendController` and `EnglishTeacherController` warning users and blocking inappropriate messages from sending.
+    4. System instructions strictly forbidding adult, sexual, romantic, NSFW, or explicit discussions.
+- Files: `backend/src/modules/live/live.routes.js`, `lib/modules/ai_friend/controllers/ai_friend_controller.dart`, `lib/modules/english_teacher/controllers/english_teacher_controller.dart`.
+- Verification: `flutter analyze` 0 issues, backend health tests passed.

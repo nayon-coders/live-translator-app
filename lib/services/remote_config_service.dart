@@ -54,7 +54,11 @@ class RemoteConfigService extends GetxService {
   bool isFeatureEnabled(String key) {
     if (features.isEmpty) return true; // Default to true if not loaded
     final feature = features.firstWhere((f) => f['key'] == key, orElse: () => null);
+    if (feature == null) {
+      // If newly added feature isn't yet present in remote config response, default to true
+      return true;
+    }
     // MySQL returns 1 for true, 0 for false in tinyint
-    return feature != null ? (feature['is_enabled'] == 1 || feature['is_enabled'] == true) : false;
+    return (feature['is_enabled'] == 1 || feature['is_enabled'] == true);
   }
 }

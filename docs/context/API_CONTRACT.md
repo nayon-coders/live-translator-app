@@ -15,7 +15,7 @@ Legend: ✅ implemented · 🕓 planned
 | ✅ | GET | `/api/v1/config` | device | features, languages, modes, levels, limits, maintenance; ETag |
 | ✅ | POST | `/api/v1/live/sessions` | device | starts teacher practice session |
 | ✅ | POST | `/api/v1/live/sessions/:id/end` | device | duration, scores, summary |
-| ✅ | POST | `/api/v1/live/chat` | device | AI English Teacher conversation turn (`{ mode_key, message, history }` → `{ reply }`) |
+| ✅ | POST | `/api/v1/live/chat` | device | AI conversation turn for English Teacher & AI Friend (`{ message, history, feature?, language_name?, mode_key? }` → `{ reply }`) |
 
 ## Admin API — `/api/admin`
 

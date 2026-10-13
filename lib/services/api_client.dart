@@ -40,14 +40,22 @@ class ApiClient extends GetxService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _deviceToken = data['token'];
-        _deviceId = data['device_id'].toString();
+        _deviceId = data['device_id']?.toString();
         await _prefs.setString('device_token', _deviceToken!);
+        debugPrint('Device registered successfully. New token obtained.');
       } else {
         debugPrint('Failed to register device: ${response.body}');
       }
     } catch (e) {
       debugPrint('Device register error: $e');
     }
+  }
+
+  Future<void> _handleUnauthorized() async {
+    debugPrint('Token unauthorized (401). Clearing and re-registering device...');
+    _deviceToken = null;
+    await _prefs.remove('device_token');
+    await _registerDevice();
   }
 
   String _generateInstallId() {
@@ -60,13 +68,26 @@ class ApiClient extends GetxService {
     final etag = _prefs.getString('config_etag');
 
     try {
-      final response = await http.get(
+      var response = await http.get(
         Uri.parse('$baseUrl/config'),
         headers: {
           if (_deviceToken != null) 'Authorization': 'Bearer $_deviceToken',
           if (etag != null) 'If-None-Match': etag,
         },
       );
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        if (_deviceToken != null) {
+          response = await http.get(
+            Uri.parse('$baseUrl/config'),
+            headers: {
+              'Authorization': 'Bearer $_deviceToken',
+              if (etag != null) 'If-None-Match': etag,
+            },
+          );
+        }
+      }
 
       if (response.statusCode == 304) {
         // Not modified, use cached
@@ -99,7 +120,11 @@ class ApiClient extends GetxService {
     String? levelCode,
   }) async {
     try {
-      final response = await http.post(
+      if (_deviceToken == null) {
+        await _registerDevice();
+      }
+
+      var response = await http.post(
         Uri.parse('$baseUrl/live/sessions'),
         headers: {
           'Content-Type': 'application/json',
@@ -110,6 +135,23 @@ class ApiClient extends GetxService {
           if (levelCode != null) 'level_code': levelCode,
         }),
       );
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        if (_deviceToken != null) {
+          response = await http.post(
+            Uri.parse('$baseUrl/live/sessions'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_deviceToken',
+            },
+            body: jsonEncode({
+              if (modeKey != null) 'mode_key': modeKey,
+              if (levelCode != null) 'level_code': levelCode,
+            }),
+          );
+        }
+      }
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -149,25 +191,47 @@ class ApiClient extends GetxService {
     String? modeKey,
     String? sessionId,
     List<Map<String, String>>? history,
+    String? feature,
+    String? languageCode,
+    String? languageName,
   }) async {
     try {
       if (_deviceToken == null) {
         await _registerDevice();
       }
 
-      final response = await http.post(
+      final payload = {
+        'message': message,
+        if (modeKey != null) 'mode_key': modeKey,
+        if (sessionId != null) 'sessionId': sessionId,
+        if (history != null) 'history': history,
+        if (feature != null) 'feature': feature,
+        if (languageCode != null) 'language_code': languageCode,
+        if (languageName != null) 'language_name': languageName,
+      };
+
+      var response = await http.post(
         Uri.parse('$baseUrl/live/chat'),
         headers: {
           'Content-Type': 'application/json',
           if (_deviceToken != null) 'Authorization': 'Bearer $_deviceToken',
         },
-        body: jsonEncode({
-          'message': message,
-          if (modeKey != null) 'mode_key': modeKey,
-          if (sessionId != null) 'sessionId': sessionId,
-          if (history != null) 'history': history,
-        }),
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        if (_deviceToken != null) {
+          response = await http.post(
+            Uri.parse('$baseUrl/live/chat'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_deviceToken',
+            },
+            body: jsonEncode(payload),
+          );
+        }
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

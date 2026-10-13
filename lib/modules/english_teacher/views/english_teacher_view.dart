@@ -294,6 +294,8 @@ class EnglishTeacherView extends GetView<EnglishTeacherController> {
         Expanded(
           child: Obx(() {
             return ListView.builder(
+              controller: controller.scrollController,
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               reverse: false,
               itemCount: controller.messages.length +
@@ -419,17 +421,22 @@ class EnglishTeacherView extends GetView<EnglishTeacherController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (!isUser) ...[
-                              const Text('🎓 ', style: TextStyle(fontSize: 14)),
-                            ],
-                            Flexible(
-                              child: Text(
-                                msg.text,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  height: 1.4,
+                              Container(
+                                margin: const EdgeInsets.only(top: 2, right: 6),
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF3B82F6).withAlpha(40),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(
+                                  Icons.school_rounded,
+                                  size: 14,
+                                  color: Color(0xFF60A5FA),
                                 ),
                               ),
+                            ],
+                            Flexible(
+                              child: _buildMessageText(msg.text, isUser),
                             ),
                           ],
                         ),
@@ -537,6 +544,11 @@ class EnglishTeacherView extends GetView<EnglishTeacherController> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                         onSubmitted: (value) => controller.sendMessage(value),
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            controller.scrollToBottom();
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -596,6 +608,98 @@ class EnglishTeacherView extends GetView<EnglishTeacherController> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Formats message text, highlighting words/phrases taught by the teacher (marked with **...**)
+  /// with bold weight and a distinct background badge color.
+  Widget _buildMessageText(String text, bool isUser) {
+    final RegExp boldRegex = RegExp(r'\*\*(.+?)\*\*');
+    final matches = boldRegex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          height: 1.4,
+        ),
+      );
+    }
+
+    final List<InlineSpan> spans = [];
+    int lastIndex = 0;
+
+    for (final match in matches) {
+      if (match.start > lastIndex) {
+        spans.add(TextSpan(
+          text: text.substring(lastIndex, match.start),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            height: 1.4,
+          ),
+        ));
+      }
+
+      final highlighted = match.group(1) ?? '';
+      if (highlighted.isNotEmpty) {
+        if (highlighted.length <= 32) {
+          spans.add(WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withAlpha(60), // Amber highlight background
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: const Color(0xFFFBBF24).withAlpha(180),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                highlighted,
+                style: const TextStyle(
+                  color: Color(0xFFFDE047), // Vibrant gold bold text
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.5,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ));
+        } else {
+          spans.add(TextSpan(
+            text: highlighted,
+            style: TextStyle(
+              color: const Color(0xFFFDE047),
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              height: 1.4,
+              backgroundColor: const Color(0xFFD97706).withAlpha(140),
+            ),
+          ));
+        }
+      }
+
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastIndex),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          height: 1.4,
+        ),
+      ));
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
     );
   }
 }

@@ -15,4 +15,6 @@ Each decision: date · decision · reason. Newest at the bottom.
 | D9 | 2026-10-09 | AI English Teacher feature lives in `lib/modules/english_teacher/` (GetX style) | Consistency with existing app |
 | D10 | 2026-10-09 | Local dev DB: `translivo` on local Homebrew MySQL 9.6 (root, no password); test DB `translivo_test` | Matches the dev machine |
 | D11 | 2026-10-11 | AI English Teacher uses turn-based REST endpoint (`POST /api/v1/live/chat`) with device STT (`speech_to_text`) and device TTS (`flutter_tts`) via `TranslationService` | Replaces bidirectional WebSocket streaming to drastically save tokens, work on standard Gemini API keys, and maintain exact consistency with language translator module |
+| D12 | 2026-10-13 | Live Translation adopts 2-way visual dual-speaker model (`You` vs `Partner`) with interactive in-place language picker, swap button, and dual mic controls | Solves ambiguity of who is speaking in which language and enables fluid 2-way translation right on the live translation screen |
+| D13 | 2026-10-13 | AI Friend feature (`lib/modules/ai_friend/`) provides multi-lingual live voice & text companion chat controllable via admin panel feature toggle (`ai_friend`) | User request: conversational companion chatting and speaking in any user-selected language with voice & text |
 

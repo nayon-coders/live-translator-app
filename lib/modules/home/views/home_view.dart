@@ -260,6 +260,18 @@ class HomeView extends GetView<HomeController> {
                                       () => Get.toNamed('/english-teacher'),
                                     ),
                                   ),
+                                if (config.isFeatureEnabled('ai_friend'))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 3.0,
+                                    ),
+                                    child: _buildBottomAction(
+                                      Icons.smart_toy_outlined,
+                                      'AI Friend',
+                                      '(Companion)',
+                                      () => Get.toNamed('/ai-friend'),
+                                    ),
+                                  ),
                               ],
                             ),
                           );
