@@ -128,3 +128,11 @@ Newest entry at the bottom. Each entry = one plan step from [MASTER_PLAN.md](./M
     4. System instructions strictly forbidding adult, sexual, romantic, NSFW, or explicit discussions.
 - Files: `backend/src/modules/live/live.routes.js`, `lib/modules/ai_friend/controllers/ai_friend_controller.dart`, `lib/modules/english_teacher/controllers/english_teacher_controller.dart`.
 - Verification: `flutter analyze` 0 issues, backend health tests passed.
+
+## ✅ C9 — Android Release Signing (.jks & key.properties) — 2026-10-17
+- Generated Android Java Keystore `upload-keystore.jks` with requested password `Translivo@2026` (alias: `upload`, validity: 10,000 days).
+- Created `android/key.properties` for production release signing.
+- Updated `.gitignore` to prevent keystore and password leaks to git.
+- Configured `android/app/build.gradle.kts` to automatically sign release builds with `signingConfigs.release`.
+- Verification: Verified certificate via `keytool -list -v` and validated signing task with `./gradlew :app:validateSigningRelease` (Build Successful).
+

@@ -46,6 +46,12 @@ app.*.map.json
 .kotlin/
 **/.kotlin/
 
+# Keystore & Signing secrets
+*.jks
+*.keystore
+**/key.properties
+key.properties
+
 # Node.js / Backend & Admin
 node_modules/
 **/node_modules/
