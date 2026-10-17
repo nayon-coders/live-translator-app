@@ -136,3 +136,10 @@ Newest entry at the bottom. Each entry = one plan step from [MASTER_PLAN.md](./M
 - Configured `android/app/build.gradle.kts` to automatically sign release builds with `signingConfigs.release`.
 - Verification: Verified certificate via `keytool -list -v` and validated signing task with `./gradlew :app:validateSigningRelease` (Build Successful).
 
+## ✅ C10 — Update Application ID & Bundle Identifier to com.translivo.app — 2026-10-17
+- Changed Android `applicationId` and `namespace` to `com.translivo.app` in `android/app/build.gradle.kts`.
+- Relocated Kotlin `MainActivity.kt` to package `com.translivo.app` (`android/app/src/main/kotlin/com/translivo/app/`).
+- Updated iOS `PRODUCT_BUNDLE_IDENTIFIER` to `com.translivo.app` across all build configurations in `ios/Runner.xcodeproj/project.pbxproj`.
+- Verification: `./gradlew :app:validateSigningRelease` successful, `flutter analyze` 0 errors.
+
+

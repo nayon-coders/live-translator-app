@@ -1,4 +1,4 @@
-package com.example.live_translator
+package com.translivo.app
 
 import io.flutter.embedding.android.FlutterActivity
 
